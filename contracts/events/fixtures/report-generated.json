@@ -1,0 +1,22 @@
+{
+  "event_id": "evt_report_generated_example_001",
+  "event_type": "ledgerlens.report.generated",
+  "schema_version": "1.0",
+  "occurred_at": "2026-08-24T19:15:00Z",
+  "run_id": "run_acme_august_close",
+  "source": "ledgerlens.reporting",
+  "idempotency_key": "report-run-acme-august-close-md",
+  "payload": {
+    "report_id": "report_acme_august_close_md",
+    "format": "markdown",
+    "artifact_uri": "reports/run_acme_august_close.md",
+    "metrics": {
+      "transactions_ingested": 1450,
+      "candidate_pairs": 812,
+      "matches": 789,
+      "exceptions": 23,
+      "llm_calls": 11,
+      "llm_cache_hits": 7
+    }
+  }
+}

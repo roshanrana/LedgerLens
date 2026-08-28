@@ -1,0 +1,41 @@
+{
+  "name": "acme_bank",
+  "client_id": "acme",
+  "profile_name": "bank_operating",
+  "source_system": "bank",
+  "account_id": "operating_bank",
+  "file_type": "csv",
+  "currency": "USD",
+  "default_currency": "USD",
+  "amount_strategy": "debit_credit",
+  "debit_is_negative": true,
+  "amount_tolerance": "0.00",
+  "date_window_days": 3,
+  "date_formats": ["%Y-%m-%d", "%m/%d/%Y"],
+  "columns": {
+    "transaction_id": "Txn ID",
+    "posting_date": "Posted",
+    "amount": "Amount",
+    "description": "Memo",
+    "reference": "Reference"
+  },
+  "column_map": {
+    "posting_date": "Posted Date",
+    "value_date": "Value Date",
+    "external_transaction_id": "Bank Txn Id",
+    "description": "Details",
+    "reference": "Reference",
+    "debit": "Debit",
+    "credit": "Credit",
+    "currency": "Currency",
+    "counterparty": "Counterparty"
+  },
+  "required_fields": ["posting_date", "description"],
+  "reference_patterns": [
+    "INV[- ]?(\\d+)",
+    "RMA[- ]?(\\d+)",
+    "PAYROLL[- ]?(\\d+)",
+    "REF[:# ]*([A-Z0-9-]+)"
+  ],
+  "description_stopwords": ["llc", "inc", "co"]
+}

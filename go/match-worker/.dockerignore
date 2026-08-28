@@ -1,0 +1,4 @@
+.git
+*.test
+coverage.out
+candidates.ndjson

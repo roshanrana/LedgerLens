@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ledgerlens.dev/contracts/schemas/event-envelope.schema.json",
+  "title": "LedgerLens Event Envelope",
+  "description": "Common envelope required for every LedgerLens event.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "event_id",
+    "event_type",
+    "schema_version",
+    "occurred_at",
+    "run_id",
+    "source",
+    "idempotency_key",
+    "payload"
+  ],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "pattern": "^evt_[A-Za-z0-9][A-Za-z0-9_-]*$"
+    },
+    "event_type": {
+      "type": "string",
+      "pattern": "^ledgerlens\\."
+    },
+    "schema_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+$"
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source": {
+      "type": "string",
+      "minLength": 1
+    },
+    "idempotency_key": {
+      "type": "string",
+      "minLength": 16
+    },
+    "payload": {
+      "type": "object"
+    }
+  }
+}

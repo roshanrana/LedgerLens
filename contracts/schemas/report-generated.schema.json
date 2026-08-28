@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ledgerlens.dev/contracts/schemas/report-generated.schema.json",
+  "title": "ledgerlens.report.generated",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "event_id",
+    "event_type",
+    "schema_version",
+    "occurred_at",
+    "run_id",
+    "source",
+    "idempotency_key",
+    "payload"
+  ],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "pattern": "^evt_[A-Za-z0-9][A-Za-z0-9_-]*$"
+    },
+    "event_type": {
+      "const": "ledgerlens.report.generated"
+    },
+    "schema_version": {
+      "const": "1.0"
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source": {
+      "type": "string",
+      "minLength": 1
+    },
+    "idempotency_key": {
+      "type": "string",
+      "minLength": 16
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "report_id",
+        "format",
+        "artifact_uri",
+        "metrics"
+      ],
+      "properties": {
+        "report_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "format": {
+          "enum": [
+            "json",
+            "markdown",
+            "html"
+          ]
+        },
+        "artifact_uri": {
+          "type": "string",
+          "minLength": 1
+        },
+        "metrics": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "transactions_ingested",
+            "candidate_pairs",
+            "matches",
+            "exceptions",
+            "llm_calls",
+            "llm_cache_hits"
+          ],
+          "properties": {
+            "transactions_ingested": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "candidate_pairs": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "matches": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "exceptions": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "llm_calls": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "llm_cache_hits": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        }
+      }
+    }
+  }
+}

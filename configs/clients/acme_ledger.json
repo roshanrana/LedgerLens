@@ -1,0 +1,40 @@
+{
+  "name": "acme_ledger",
+  "client_id": "acme",
+  "profile_name": "ar_ledger",
+  "source_system": "ledger",
+  "account_id": "ar_ledger",
+  "file_type": "csv",
+  "currency": "USD",
+  "default_currency": "USD",
+  "amount_strategy": "signed_amount",
+  "debit_is_negative": true,
+  "amount_tolerance": "0.00",
+  "date_window_days": 3,
+  "date_formats": ["%Y-%m-%d", "%m/%d/%Y"],
+  "columns": {
+    "transaction_id": "Entry ID",
+    "posting_date": "Accounting Date",
+    "debit": "Debit",
+    "credit": "Credit",
+    "description": "Narrative",
+    "reference": "Invoice"
+  },
+  "column_map": {
+    "posting_date": "Accounting Date",
+    "value_date": "Value Date",
+    "external_transaction_id": "Entry ID",
+    "description": "Memo",
+    "reference": "Invoice",
+    "amount": "Amount",
+    "currency": "Currency",
+    "counterparty": "Customer"
+  },
+  "required_fields": ["posting_date", "amount", "description"],
+  "reference_patterns": [
+    "INV[- ]?(\\d+)",
+    "RMA[- ]?(\\d+)",
+    "PAYROLL[- ]?(\\d+)"
+  ],
+  "description_stopwords": ["llc", "inc", "co"]
+}

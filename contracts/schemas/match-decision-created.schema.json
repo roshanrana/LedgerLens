@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ledgerlens.dev/contracts/schemas/match-decision-created.schema.json",
+  "title": "ledgerlens.match.decision_created",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "event_id",
+    "event_type",
+    "schema_version",
+    "occurred_at",
+    "run_id",
+    "source",
+    "idempotency_key",
+    "payload"
+  ],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "pattern": "^evt_[A-Za-z0-9][A-Za-z0-9_-]*$"
+    },
+    "event_type": {
+      "const": "ledgerlens.match.decision_created"
+    },
+    "schema_version": {
+      "const": "1.0"
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source": {
+      "type": "string",
+      "minLength": 1
+    },
+    "idempotency_key": {
+      "type": "string",
+      "minLength": 16
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "match_decision_id",
+        "candidate_pair_id",
+        "decision",
+        "tier",
+        "confidence",
+        "reason_code",
+        "explanation",
+        "decided_by"
+      ],
+      "properties": {
+        "match_decision_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "candidate_pair_id": {
+          "type": "string",
+          "pattern": "^pair_[A-Za-z0-9_-]+$"
+        },
+        "decision": {
+          "enum": [
+            "match",
+            "no_match",
+            "duplicate",
+            "needs_review",
+            "unmatched"
+          ]
+        },
+        "tier": {
+          "enum": [
+            "exact",
+            "rule",
+            "fuzzy",
+            "llm",
+            "human"
+          ]
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "reason_code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "explanation": {
+          "type": "string",
+          "minLength": 1
+        },
+        "llm_cache_key": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "review_task_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "decided_by": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

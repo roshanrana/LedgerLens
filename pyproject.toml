@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ledgerlens"
+version = "0.1.0"
+description = "AI-assisted, audit-ready financial reconciliation agent with deterministic-first matching."
+requires-python = ">=3.11"
+authors = [{ name = "LedgerLens" }]
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+live-llm = ["openai>=1.0"]
+
+[project.scripts]
+ledgerlens = "ledgerlens.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["ledgerlens*"]
+

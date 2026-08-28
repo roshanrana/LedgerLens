@@ -1,0 +1,18 @@
+{
+  "event_id": "evt_review_resolved_example_001",
+  "event_type": "ledgerlens.review.resolved",
+  "schema_version": "1.0",
+  "occurred_at": "2026-08-24T19:10:00Z",
+  "run_id": "run_acme_august_close",
+  "source": "ledgerlens.review",
+  "idempotency_key": "review-resolved-review-001",
+  "payload": {
+    "review_task_id": "review_001",
+    "candidate_pair_id": "pair_txn_bank_002_txn_ledger_002",
+    "status": "resolved",
+    "reviewer_decision": "no_match",
+    "reviewer_notes": "Same vendor and amount, but references point to different invoices.",
+    "reviewed_by": "analyst@example.com",
+    "resolved_at": "2026-08-24T19:10:00Z"
+  }
+}

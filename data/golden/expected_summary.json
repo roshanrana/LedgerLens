@@ -1,0 +1,6 @@
+{
+  "normalized_transactions": 12,
+  "minimum_candidate_pairs": 4,
+  "expected_decision_tiers": ["exact", "rule", "llm"],
+  "minimum_review_tasks": 1
+}

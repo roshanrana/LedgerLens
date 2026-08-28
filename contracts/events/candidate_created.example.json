@@ -1,0 +1,23 @@
+{
+  "event_id": "evt_candidate_001",
+  "event_type": "ledgerlens.match.candidate_created",
+  "schema_version": "1.0",
+  "occurred_at": "2026-08-24T12:00:01Z",
+  "run_id": "run_demo",
+  "source": "ledgerlens.match-worker.go",
+  "idempotency_key": "candidate-pair-txn-001-txn-002",
+  "payload": {
+    "candidate_pair_id": "pair_txn_001_txn_002",
+    "left_transaction_id": "txn_001",
+    "right_transaction_id": "txn_002",
+    "blocking_reason": "same_amount_reference_window",
+    "feature_vector": {
+      "amount_delta": "0.00",
+      "date_delta_days": 1,
+      "reference_overlap": 1.0,
+      "description_similarity": 0.8
+    },
+    "candidate_score": 0.94,
+    "created_by": "go-match-worker"
+  }
+}

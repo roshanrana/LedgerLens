@@ -1,0 +1,21 @@
+{
+  "event_id": "evt_statement_acme_bank_001",
+  "event_type": "ledgerlens.statement.ingested",
+  "schema_version": "1.0",
+  "occurred_at": "2026-08-24T19:00:00Z",
+  "run_id": "run_acme_august_close",
+  "source": "ledgerlens.ingestion",
+  "idempotency_key": "source-file-acme-bank-a-20260824",
+  "payload": {
+    "source_file_id": "src_bank_a_august",
+    "client_id": "acme",
+    "source_system": "bank_a",
+    "account_id": "operating_bank",
+    "filename": "bank_a_august.csv",
+    "file_hash": "sha256-bank-a-august-file",
+    "mapping_profile": "bank-a-v1",
+    "row_count": 2,
+    "status": "accepted",
+    "quality_flags": []
+  }
+}

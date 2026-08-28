@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ledgerlens.dev/contracts/schemas/match-candidate-created.schema.json",
+  "title": "ledgerlens.match.candidate_created",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "event_id",
+    "event_type",
+    "schema_version",
+    "occurred_at",
+    "run_id",
+    "source",
+    "idempotency_key",
+    "payload"
+  ],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "pattern": "^evt_[A-Za-z0-9][A-Za-z0-9_-]*$"
+    },
+    "event_type": {
+      "const": "ledgerlens.match.candidate_created"
+    },
+    "schema_version": {
+      "const": "1.0"
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source": {
+      "type": "string",
+      "minLength": 1
+    },
+    "idempotency_key": {
+      "type": "string",
+      "minLength": 16
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "candidate_pair_id",
+        "left_transaction_id",
+        "right_transaction_id",
+        "blocking_reason",
+        "feature_vector",
+        "candidate_score",
+        "created_by"
+      ],
+      "properties": {
+        "candidate_pair_id": {
+          "type": "string",
+          "pattern": "^pair_[A-Za-z0-9_-]+$"
+        },
+        "left_transaction_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "right_transaction_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "blocking_reason": {
+          "enum": [
+            "same_amount_reference_window",
+            "same_amount_loose_fingerprint_window"
+          ]
+        },
+        "feature_vector": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "amount_delta",
+            "date_delta_days",
+            "reference_overlap",
+            "description_similarity"
+          ],
+          "properties": {
+            "amount_delta": {
+              "type": "string",
+              "pattern": "^\\d+(\\.\\d{1,6})?$"
+            },
+            "date_delta_days": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "reference_overlap": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "description_similarity": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          }
+        },
+        "candidate_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "created_by": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

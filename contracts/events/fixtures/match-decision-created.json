@@ -1,0 +1,21 @@
+{
+  "event_id": "evt_decision_example_001",
+  "event_type": "ledgerlens.match.decision_created",
+  "schema_version": "1.0",
+  "occurred_at": "2026-08-24T19:00:04Z",
+  "run_id": "run_acme_august_close",
+  "source": "ledgerlens.matching",
+  "idempotency_key": "decision-pair-txn-bank-001-txn-ledger-001",
+  "payload": {
+    "match_decision_id": "dec_exact_001",
+    "candidate_pair_id": "pair_txn_bank_001_txn_ledger_001",
+    "decision": "match",
+    "tier": "rule",
+    "confidence": 0.98,
+    "reason_code": "same_reference_date_window",
+    "explanation": "Amounts align, references normalize to the same value, and dates are within policy.",
+    "llm_cache_key": null,
+    "review_task_id": null,
+    "decided_by": "ledgerlens.matching.rules"
+  }
+}

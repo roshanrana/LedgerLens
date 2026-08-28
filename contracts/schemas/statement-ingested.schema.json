@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ledgerlens.dev/contracts/schemas/statement-ingested.schema.json",
+  "title": "ledgerlens.statement.ingested",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "event_id",
+    "event_type",
+    "schema_version",
+    "occurred_at",
+    "run_id",
+    "source",
+    "idempotency_key",
+    "payload"
+  ],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "pattern": "^evt_[A-Za-z0-9][A-Za-z0-9_-]*$"
+    },
+    "event_type": {
+      "const": "ledgerlens.statement.ingested"
+    },
+    "schema_version": {
+      "const": "1.0"
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source": {
+      "type": "string",
+      "minLength": 1
+    },
+    "idempotency_key": {
+      "type": "string",
+      "minLength": 16
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_file_id",
+        "client_id",
+        "source_system",
+        "account_id",
+        "filename",
+        "file_hash",
+        "mapping_profile",
+        "row_count",
+        "status"
+      ],
+      "properties": {
+        "source_file_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "client_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_system": {
+          "type": "string",
+          "minLength": 1
+        },
+        "account_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "filename": {
+          "type": "string",
+          "minLength": 1
+        },
+        "file_hash": {
+          "type": "string",
+          "minLength": 16
+        },
+        "mapping_profile": {
+          "type": "string",
+          "minLength": 1
+        },
+        "row_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "status": {
+          "enum": [
+            "accepted",
+            "rejected",
+            "partially_accepted"
+          ]
+        },
+        "quality_flags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

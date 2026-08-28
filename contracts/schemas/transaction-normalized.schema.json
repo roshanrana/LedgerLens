@@ -1,0 +1,145 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ledgerlens.dev/contracts/schemas/transaction-normalized.schema.json",
+  "title": "ledgerlens.transaction.normalized",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "event_id",
+    "event_type",
+    "schema_version",
+    "occurred_at",
+    "run_id",
+    "source",
+    "idempotency_key",
+    "payload"
+  ],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "pattern": "^evt_[A-Za-z0-9][A-Za-z0-9_-]*$"
+    },
+    "event_type": {
+      "const": "ledgerlens.transaction.normalized"
+    },
+    "schema_version": {
+      "const": "1.0"
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source": {
+      "type": "string",
+      "minLength": 1
+    },
+    "idempotency_key": {
+      "type": "string",
+      "minLength": 16
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "transaction_id",
+        "raw_transaction_id",
+        "account_id",
+        "source_system",
+        "posting_date",
+        "amount",
+        "currency",
+        "direction",
+        "description_raw",
+        "description_normalized",
+        "fingerprint_exact",
+        "fingerprint_loose",
+        "quality_flags"
+      ],
+      "properties": {
+        "transaction_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "raw_transaction_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "account_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_system": {
+          "type": "string",
+          "minLength": 1
+        },
+        "external_transaction_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "posting_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "value_date": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "amount": {
+          "type": "string",
+          "pattern": "^-?\\d+(\\.\\d{1,6})?$"
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$"
+        },
+        "direction": {
+          "enum": [
+            "debit",
+            "credit"
+          ]
+        },
+        "description_raw": {
+          "type": "string"
+        },
+        "description_normalized": {
+          "type": "string"
+        },
+        "counterparty": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "reference": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "fingerprint_exact": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fingerprint_loose": {
+          "type": "string",
+          "minLength": 1
+        },
+        "quality_flags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

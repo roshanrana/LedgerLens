@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ledgerlens.dev/contracts/schemas/review-resolved.schema.json",
+  "title": "ledgerlens.review.resolved",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "event_id",
+    "event_type",
+    "schema_version",
+    "occurred_at",
+    "run_id",
+    "source",
+    "idempotency_key",
+    "payload"
+  ],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "pattern": "^evt_[A-Za-z0-9][A-Za-z0-9_-]*$"
+    },
+    "event_type": {
+      "const": "ledgerlens.review.resolved"
+    },
+    "schema_version": {
+      "const": "1.0"
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source": {
+      "type": "string",
+      "minLength": 1
+    },
+    "idempotency_key": {
+      "type": "string",
+      "minLength": 16
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "review_task_id",
+        "candidate_pair_id",
+        "status",
+        "reviewer_decision",
+        "reviewed_by",
+        "resolved_at"
+      ],
+      "properties": {
+        "review_task_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "candidate_pair_id": {
+          "type": "string",
+          "pattern": "^pair_[A-Za-z0-9_-]+$"
+        },
+        "status": {
+          "const": "resolved"
+        },
+        "reviewer_decision": {
+          "enum": [
+            "match",
+            "no_match",
+            "duplicate",
+            "needs_review",
+            "unmatched"
+          ]
+        },
+        "reviewer_notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "reviewed_by": {
+          "type": "string",
+          "minLength": 1
+        },
+        "resolved_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    }
+  }
+}

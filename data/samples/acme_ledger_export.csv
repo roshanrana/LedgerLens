@@ -1,0 +1,7 @@
+Accounting Date,Value Date,Entry ID,Memo,Invoice,Amount,Currency,Customer
+05/03/2026,05/01/2026,LED-9001,Customer payment Acme invoice 8127,INV-8127,1250.00,USD,ACME CORP
+05/02/2026,05/02/2026,LED-9002,Payment to Vendor Alpha V-204,V-204,-500.00,USD,VENDOR ALPHA
+2026-05-05,2026-05-05,LED-9003,Customer refund RMA 77,RMA-77,-120.00,USD,BETA MARKET
+2026-05-03,2026-05-03,LED-9004,Beta market settlement INV 8841,INV-8841,74.12,USD,BETA MARKET
+2026-05-06,2026-05-06,LED-9005,Unmatched customer short pay INV-8129,INV-8129,400.00,USD,ACME CORP
+2026-05-04,2026-05-04,LED-9006,Bank monthly service charge,,25.00,USD,

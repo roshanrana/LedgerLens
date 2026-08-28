@@ -1,0 +1,18 @@
+{
+  "event_id": "evt_review_required_example_001",
+  "event_type": "ledgerlens.review.required",
+  "schema_version": "1.0",
+  "occurred_at": "2026-08-24T19:00:05Z",
+  "run_id": "run_acme_august_close",
+  "source": "ledgerlens.matching",
+  "idempotency_key": "review-required-pair-txn-bank-002-txn-ledger-002",
+  "payload": {
+    "review_task_id": "review_001",
+    "candidate_pair_id": "pair_txn_bank_002_txn_ledger_002",
+    "priority": "medium",
+    "status": "open",
+    "reason": "Candidate score is inside the ambiguous review band.",
+    "suggested_decision": "needs_review",
+    "assigned_to": null
+  }
+}

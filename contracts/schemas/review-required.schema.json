@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ledgerlens.dev/contracts/schemas/review-required.schema.json",
+  "title": "ledgerlens.review.required",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "event_id",
+    "event_type",
+    "schema_version",
+    "occurred_at",
+    "run_id",
+    "source",
+    "idempotency_key",
+    "payload"
+  ],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "pattern": "^evt_[A-Za-z0-9][A-Za-z0-9_-]*$"
+    },
+    "event_type": {
+      "const": "ledgerlens.review.required"
+    },
+    "schema_version": {
+      "const": "1.0"
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source": {
+      "type": "string",
+      "minLength": 1
+    },
+    "idempotency_key": {
+      "type": "string",
+      "minLength": 16
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "review_task_id",
+        "candidate_pair_id",
+        "priority",
+        "status",
+        "reason",
+        "suggested_decision"
+      ],
+      "properties": {
+        "review_task_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "candidate_pair_id": {
+          "type": "string",
+          "pattern": "^pair_[A-Za-z0-9_-]+$"
+        },
+        "priority": {
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ]
+        },
+        "status": {
+          "const": "open"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "suggested_decision": {
+          "enum": [
+            "match",
+            "no_match",
+            "duplicate",
+            "needs_review",
+            "unmatched"
+          ]
+        },
+        "assigned_to": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    }
+  }
+}

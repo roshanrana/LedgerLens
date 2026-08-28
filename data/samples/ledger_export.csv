@@ -1,0 +1,8 @@
+Entry ID,Accounting Date,Debit,Credit,Narrative,Invoice
+L-2001,2026-05-01,0,1250.00,Customer payment from ACME invoice 8127,INV-8127
+L-2002,2026-05-04,85.00,0,Monthly bank service charge,FEE-MAY
+L-2003,2026-05-05,500.00,0,Payroll funding transfer,TRF-77
+L-2004,2026-05-06,0,310.42,Stripe payout batch 9182,PO-9182
+L-2005,2026-05-08,0,1000.99,Unidentified customer credit JD555,JD555
+L-2006,2026-05-10,0,49.99,Office supplies card settlement,OFF-44
+

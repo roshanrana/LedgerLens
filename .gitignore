@@ -1,0 +1,15 @@
+.ledgerlens/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.env
+.env.*
+!.env.example
+*.db
+*.db-shm
+*.db-wal
+coverage.xml
+htmlcov/
+

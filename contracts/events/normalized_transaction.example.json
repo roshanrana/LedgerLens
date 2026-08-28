@@ -1,0 +1,28 @@
+{
+  "event_id": "evt_txn_example_001",
+  "event_type": "ledgerlens.transaction.normalized",
+  "schema_version": "1.0",
+  "occurred_at": "2026-08-24T12:00:00Z",
+  "run_id": "run_demo",
+  "source": "ledgerlens.normalization",
+  "idempotency_key": "normalized-txn-example-001",
+  "payload": {
+    "transaction_id": "txn_001",
+    "raw_transaction_id": "raw_001",
+    "account_id": "operating_bank",
+    "source_system": "bank",
+    "external_transaction_id": "BANK-001",
+    "posting_date": "2026-05-03",
+    "value_date": "2026-05-03",
+    "amount": "1250.00",
+    "currency": "USD",
+    "direction": "credit",
+    "description_raw": "WIRE RECEIVED ACME INV 8127",
+    "description_normalized": "WIRE RECEIVED ACME INV 8127",
+    "counterparty": "ACME INC",
+    "reference": "INV8127",
+    "fingerprint_exact": "example",
+    "fingerprint_loose": "example",
+    "quality_flags": []
+  }
+}

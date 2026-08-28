@@ -1,0 +1,23 @@
+{
+  "event_id": "evt_candidate_example_001",
+  "event_type": "ledgerlens.match.candidate_created",
+  "schema_version": "1.0",
+  "occurred_at": "2026-08-24T19:00:03Z",
+  "run_id": "run_acme_august_close",
+  "source": "ledgerlens.match-worker.go",
+  "idempotency_key": "candidate-txn_bank_001-txn_ledger_001",
+  "payload": {
+    "candidate_pair_id": "pair_txn_bank_001_txn_ledger_001",
+    "left_transaction_id": "txn_bank_001",
+    "right_transaction_id": "txn_ledger_001",
+    "blocking_reason": "same_amount_reference_window",
+    "feature_vector": {
+      "amount_delta": "0.00",
+      "date_delta_days": 2,
+      "reference_overlap": 1.0,
+      "description_similarity": 0.57
+    },
+    "candidate_score": 0.9,
+    "created_by": "go-match-worker"
+  }
+}
