@@ -1,11 +1,11 @@
-# LedgerLens FDE Demo Runbook
+# LedgerLens Demo Runbook
 
 Status: Portfolio demo guide  
 Date: 2026-08-28
 
 ## Demo Story
 
-LedgerLens shows a pragmatic forward deployed engineering pattern:
+LedgerLens shows a pragmatic customer-facing implementation engineering pattern:
 
 1. Start with messy client-controlled files.
 2. Configure source mappings without code changes.
@@ -90,7 +90,7 @@ Run reconciliation against explicit source/profile pairs:
 & "C:\Users\rosha\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" -m ledgerlens.cli --db .ledgerlens\custom.db reconcile --client-id acme --source data\samples\acme_bank_statement.csv configs\clients\acme_bank.json --source data\samples\acme_ledger_export.csv configs\clients\acme_ledger.json
 ```
 
-This is the FDE onboarding hook: a new client source should require a mapping profile and focused tests, not changes to reconciliation code.
+This is the implementation onboarding hook: a new client source should require a mapping profile and focused tests, not changes to reconciliation code.
 
 ## API Demo
 
@@ -140,7 +140,7 @@ The worker demonstrates:
 6. Add a small sample CSV under `data/samples/`.
 7. Write a focused ingestion/normalization test before changing matching logic.
 
-## Interview Talking Points
+## Demo Talking Points
 
 - The architecture is a modular monolith with an optional event-driven sidecar path.
 - SQLite keeps the demo portable, while the schema maps cleanly to Postgres.

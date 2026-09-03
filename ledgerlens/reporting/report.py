@@ -58,7 +58,7 @@ def generate_markdown_report(store: SQLiteStore, run_id: str) -> str:
         lines.append("")
     lines.extend(
         [
-            "## FDE Demo Notes",
+            "## Demo Notes",
             "",
             "- Deterministic tiers handle clear work before the fake LLM adjudicator is consulted.",
             "- Every decision is persisted with evidence and an audit event.",

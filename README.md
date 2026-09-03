@@ -1,12 +1,12 @@
 # LedgerLens
 
-LedgerLens is a portfolio-ready, AI-assisted reconciliation agent. It is built to show forward deployed engineering judgment: deterministic matching first, fuzzy matching for messy cases, an offline fake LLM adjudicator for ambiguous pairs, human review for risk, and audit-ready reporting.
+LedgerLens is a portfolio-ready, AI-assisted reconciliation agent. It is built to show customer-facing implementation judgment: deterministic matching first, fuzzy matching for messy cases, an offline fake LLM adjudicator for ambiguous pairs, human review for risk, and audit-ready reporting.
 
-## Interview Snapshot
+## Project Snapshot
 
 | | |
 |---|---|
-| Role signal | Forward deployed AI engineering for financial operations: messy client files in, reconciled decisions, exceptions, and audit evidence out. |
+| Delivery signal | Customer-facing AI implementation for financial operations: messy client files in, reconciled decisions, exceptions, and audit evidence out. |
 | Product features | Config-driven source onboarding, raw-row provenance, canonical transaction normalization, source diagnostics, tiered matching, LLM-style adjudication cache, human review tasks, unmatched exception reporting, Markdown reports. |
 | Implementation stack | Python 3.11, SQLite, dependency-free CLI/API, JSON event schemas, Go match worker, Docker, Kafka/Redpanda-compatible streaming profile. |
 | Validation performed | Unit, contract, golden, and e2e tests; CLI demo smoke; Dockerized Go worker tests; worker image build; Python-exported event replay through the Go worker; Docker Compose streaming validation; optional Redpanda produce/consume smoke. |
@@ -25,7 +25,7 @@ LedgerLens is a portfolio-ready, AI-assisted reconciliation agent. It is built t
 - Go match-worker source for event transformation and candidate generation.
 - Offline default tests; no OpenAI key is required.
 
-For the portfolio narrative, see `docs/04-functionality-real-world-ai-fde-brief.md`.
+For the portfolio narrative, see `docs/04-functionality-real-world-ai-brief.md`.
 
 ## Quick Start
 

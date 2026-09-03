@@ -1,4 +1,4 @@
-# LedgerLens Functionality, Real-World Value, And FDE AI Narrative
+# LedgerLens Functionality, Real-World Value, And Customer-Facing AI Narrative
 
 Status: Portfolio brief  
 Date: 2026-08-28  
@@ -6,9 +6,9 @@ Project: LedgerLens, an AI-assisted reconciliation agent
 
 ## 1. Executive Summary
 
-LedgerLens is an AI-assisted financial reconciliation system built to demonstrate practical forward deployed engineering judgment. It ingests messy account statements from multiple client systems, normalizes the data into a canonical transaction model, reconciles transactions through a cost-aware matching pipeline, escalates ambiguous cases to an LLM-style adjudication boundary, routes risky items to human review, and produces audit-ready reports.
+LedgerLens is an AI-assisted financial reconciliation system built to demonstrate practical customer-facing implementation judgment. It ingests messy account statements from multiple client systems, normalizes the data into a canonical transaction model, reconciles transactions through a cost-aware matching pipeline, escalates ambiguous cases to an LLM-style adjudication boundary, routes risky items to human review, and produces audit-ready reports.
 
-The project is intentionally not "LLM everywhere." It shows the engineering discipline expected from an FDE: use deterministic logic where it is cheaper and more reliable, use AI only where ambiguity creates value, preserve human control, and make every integration traceable.
+The project is intentionally not "LLM everywhere." It shows the engineering discipline expected in serious implementation work: use deterministic logic where it is cheaper and more reliable, use AI only where ambiguity creates value, preserve human control, and make every integration traceable.
 
 Core positioning:
 
@@ -77,7 +77,7 @@ Mapping profiles in `configs/clients/` define how messy client files are interpr
 
 Why it matters:
 
-- FDEs often walk into client-specific data environments.
+- Implementation teams often walk into client-specific data environments.
 - The project shows that a new client source can be onboarded through configuration and focused tests, instead of hard-coding every new file layout.
 
 ### 4.2 CSV Ingestion And Raw Evidence Preservation
@@ -124,7 +124,7 @@ The system surfaces diagnostics such as:
 
 Why it matters:
 
-- A strong FDE does not only make downstream matching smarter.
+- A strong implementation engineer does not only make downstream matching smarter.
 - They also identify upstream data quality problems that cause operational pain.
 
 ### 4.5 Tiered Matching Pipeline
@@ -185,7 +185,7 @@ Why it matters:
 
 - Agentic finance systems need cost controls.
 - Repeated ambiguous pairs should not trigger repeated model calls.
-- This creates a clear interview talking point around token, latency, and budget discipline.
+- This creates a clear technical review talking point around token, latency, and budget discipline.
 
 ### 4.9 Human-In-The-Loop Review
 
@@ -287,7 +287,7 @@ The CLI supports:
 
 Why it matters:
 
-- FDEs often need practical command-line tools for client demos, data validation, and rapid troubleshooting.
+- Implementation teams often need practical command-line tools for client demos, data validation, and rapid troubleshooting.
 
 ### 4.15 Go Match Worker
 
@@ -457,7 +457,7 @@ AI was used to shape the product strategy around:
 
 - Finance automation trends.
 - Task-specific agent patterns.
-- FDE hiring signals.
+- technical review signals.
 - Practical use of Go and Kafka.
 - Cost-aware LLM escalation.
 - Human-in-the-loop controls.
@@ -509,7 +509,7 @@ Specialized AI QA agents reviewed the project from different angles:
 - Python/API/reconciliation correctness.
 - Go/Kafka/event-boundary reliability.
 
-That surfaced portfolio-relevant issues that were then fixed and regression-tested. This mirrors how an FDE can use AI not only to write code, but to create parallel review pressure across product, backend, integration, and reliability concerns.
+That surfaced portfolio-relevant issues that were then fixed and regression-tested. This mirrors how an implementation engineer can use AI not only to write code, but to create parallel review pressure across product, backend, integration, and reliability concerns.
 
 ### 6.6 AI For Integration Verification
 
@@ -523,9 +523,9 @@ AI helped connect the Python and Go parts through a real contract:
 
 This is useful because AI-generated code is only valuable when it survives integration. LedgerLens demonstrates that principle directly.
 
-## 7. Why This Is Useful For A Forward Deployed Engineer Role
+## 7. Why This Is Useful In Customer-Facing Implementation
 
-Forward deployed engineers sit between customers, product, data, and production systems. LedgerLens maps well to that role because it demonstrates:
+Customer-facing implementation engineers sit between customers, product, data, and production systems. LedgerLens maps well to that work because it demonstrates:
 
 - Ability to understand a real operational workflow.
 - Ability to handle messy customer data.
@@ -538,7 +538,7 @@ Forward deployed engineers sit between customers, product, data, and production 
 - Ability to create a demo that a non-engineering stakeholder can understand.
 - Ability to explain tradeoffs around cost, latency, reliability, and trust.
 
-The project is especially strong for FDE interviews because it can be discussed at multiple levels:
+The project is especially strong for implementation technical reviews because it can be discussed at multiple levels:
 
 - Business problem: close-cycle reconciliation and exception reduction.
 - Product behavior: tiered matching, review queue, reports.
@@ -548,7 +548,7 @@ The project is especially strong for FDE interviews because it can be discussed 
 - Systems engineering: Go worker, Docker, Kafka, Redpanda.
 - Delivery discipline: design docs, tests, verifier, runbook.
 
-## 8. Suggested Interview Narrative
+## 8. Suggested Demo Narrative
 
 Short version:
 
@@ -562,7 +562,7 @@ Go/Kafka version:
 
 > I kept Go focused on the sidecar workload where it is credible: consuming normalized transaction events, generating bounded candidate events, and committing Kafka offsets only after candidate writes succeed. The Python workflow remains the orchestration and reporting layer. That split shows I can use distributed systems without overcomplicating the core product.
 
-FDE version:
+customer-facing implementation version:
 
 > The project is designed around client onboarding. A new source is mostly a mapping profile plus tests. The system surfaces source quality diagnostics, preserves raw evidence, exports events for replay, and creates reports that finance stakeholders can read. That is the kind of practical implementation path I would want in a customer deployment.
 
@@ -628,4 +628,4 @@ Strong next steps, if the project is expanded:
 - Add support for more file types such as XLSX.
 - Add batch replay commands from persisted event exports.
 
-These are intentionally future-facing. The current build already demonstrates the core FDE signal: practical AI integration, messy data handling, deterministic-first engineering, human review, auditability, Go/Kafka integration, and reproducible delivery.
+These are intentionally future-facing. The current build already demonstrates the core delivery signal: practical AI integration, messy data handling, deterministic-first engineering, human review, auditability, Go/Kafka integration, and reproducible delivery.

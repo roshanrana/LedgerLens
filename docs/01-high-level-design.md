@@ -16,7 +16,7 @@ LedgerLens reconciles financial transactions by using the cheapest reliable tech
 
 The portfolio story is intentionally pragmatic: LedgerLens is not an LLM demo pretending to be a finance system. It is a finance-grade workflow that uses AI where it creates leverage, preserves auditability, and demonstrates production judgment.
 
-## 2. Market And Hiring Signal
+## 2. Market And Delivery Signal
 
 The design is based on current finance automation and enterprise AI trends as of 2026-08-24.
 
@@ -30,7 +30,7 @@ Key signals:
 - SQLite is acceptable for a portfolio-scale local system because WAL mode allows readers and a writer to proceed concurrently, while preserving a low-ops demo footprint. Source: https://www.sqlite.org/wal.html
 - Go is a strong fit for concurrent workers and network services; official Go docs call out goroutines and channels as simple primitives for concurrent execution. Source: https://go.dev/doc/
 
-Forward Deployed Engineering signal:
+customer-facing implementation engineering signal:
 
 - The project should look deployable into a messy client environment, not only into a clean demo.
 - The differentiator is rapid onboarding of a new source, configurable mappings, audit-ready reasoning, observability, replayability, and a clear migration path from local batch to event-driven enterprise flows.
@@ -45,7 +45,7 @@ Primary users:
 
 - Reconciliation analyst: reviews exceptions, approves ambiguous matches, exports evidence.
 - Controller or finance manager: monitors match rates, aging exceptions, close readiness, and source quality.
-- Forward deployed engineer: configures a new client source, maps messy fields, tunes thresholds, validates outcomes, and demonstrates time-to-value.
+- Customer-facing implementation engineer: configures a new client source, maps messy fields, tunes thresholds, validates outcomes, and demonstrates time-to-value.
 - Auditor or reviewer: traces every automated, AI-assisted, and human decision back to source records.
 
 ## 4. Goals
@@ -100,7 +100,7 @@ LedgerLens should accept client-specific YAML or JSON mapping files:
 
 Why it matters:
 
-- This is a strong FDE feature because it proves the project can adapt to client-specific data without code changes.
+- This is a strong implementation feature because it proves the project can adapt to client-specific data without code changes.
 
 ### 6.2 Source Quality Diagnostics
 
@@ -183,7 +183,7 @@ Reports should include:
 - Estimated analyst time saved.
 - Source quality recommendations.
 
-This gives interviewers something concrete to inspect and gives the system a CFO/controller-facing output.
+This gives technical reviewers something concrete to inspect and gives the system a CFO/controller-facing output.
 
 ## 7. System Architecture
 
@@ -324,10 +324,10 @@ Phase 4: Go/Kafka path
 - Go deterministic match worker.
 - Replayable event demo.
 
-Phase 5: FDE polish
+Phase 5: delivery polish
 
 - Onboarding runbook.
 - Dashboard or review UI.
 - Source diagnostics view.
-- Interview-grade architecture walkthrough.
+- Architecture walkthrough for technical review.
 

@@ -18,7 +18,7 @@ class ReviewResolutionTests(unittest.TestCase):
                 open_reviews[0]["id"],
                 decision="no_match",
                 notes="Bank fee wording is similar but policy requires manual no-match.",
-                reviewer="fde-demo",
+                reviewer="review-demo",
             )
 
             self.assertEqual(resolved["decision"]["tier"], "human")
@@ -36,7 +36,7 @@ class ReviewResolutionTests(unittest.TestCase):
                     open_reviews[0]["id"],
                     decision="match",
                     notes="Conflicting second resolution",
-                    reviewer="fde-demo",
+                    reviewer="review-demo",
                 )
 
 
