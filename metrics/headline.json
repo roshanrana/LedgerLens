@@ -1,0 +1,100 @@
+{
+  "kpis": {
+    "golden_checks": {
+      "label": "Golden checks passed",
+      "value": "6 / 6",
+      "note": "acme replay scored against data/golden/expected_summary.json",
+      "accent": "teal"
+    },
+    "match_rate": {
+      "label": "Match rate",
+      "value": "75%",
+      "note": "3 of 4 candidate decisions matched (exact 2, rule 1)",
+      "accent": "blue"
+    },
+    "straight_through_rate": {
+      "label": "Straight-through",
+      "value": "75%",
+      "note": "3 of 4 decisions closed by exact/rule/fuzzy tiers without review",
+      "accent": "violet"
+    },
+    "review_required_rate": {
+      "label": "Review required",
+      "value": "25%",
+      "note": "1 of 4 decisions routed to a human review task",
+      "accent": "amber"
+    },
+    "schema_conformance": {
+      "label": "Schema conformance",
+      "value": "12 / 12",
+      "note": "emitted transaction.normalized events validated against contracts/schemas (Draft 2020-12, structural)",
+      "accent": "teal"
+    }
+  },
+  "bars": {
+    "title": "Decision routing (acme replay)",
+    "rows": [
+      {
+        "label": "Straight-through matches",
+        "value": 3,
+        "max": 4,
+        "display": "3 of 4 decisions",
+        "accent": "teal"
+      },
+      {
+        "label": "Review required",
+        "value": 1,
+        "max": 4,
+        "display": "1 of 4 decisions",
+        "accent": "amber"
+      },
+      {
+        "label": "Unmatched transactions",
+        "value": 4,
+        "max": 12,
+        "display": "4 of 12 transactions (2 bank, 2 ledger)",
+        "accent": "red"
+      }
+    ]
+  },
+  "facts": {
+    "title": "Replay evidence",
+    "rows": [
+      {
+        "label": "Samples replayed",
+        "value": "acme_bank_statement.csv (6 rows) + acme_ledger_export.csv (6 rows) -> 12 normalized transactions",
+        "status": "ok"
+      },
+      {
+        "label": "Samples without a profile",
+        "value": "bank_statement.csv, ledger_export.csv: no profile under configs/clients maps their headers, so they were not replayed",
+        "status": "pending"
+      },
+      {
+        "label": "Precision / recall / F1",
+        "value": "expected_summary.json carries aggregate thresholds only; no per-pair match labels to score against",
+        "status": "pending"
+      },
+      {
+        "label": "Contract fixtures validated",
+        "value": "12 of 12 events under contracts/events pass their declared schema",
+        "status": "ok"
+      },
+      {
+        "label": "Fake-LLM adjudications",
+        "value": "calls 1, cache hits 0 (DeterministicFakeLLM, offline)",
+        "status": "ok"
+      },
+      {
+        "label": "Live LLM adjudication",
+        "value": "harness runs offline with no API key; live-model accuracy not measured",
+        "status": "pending"
+      },
+      {
+        "label": "Go match-worker candidates",
+        "value": "not executed by this harness; covered by go test in go/match-worker",
+        "status": "pending"
+      }
+    ]
+  }
+}

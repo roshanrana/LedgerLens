@@ -11,7 +11,7 @@ authors = [{ name = "LedgerLens" }]
 dependencies = []
 
 [project.optional-dependencies]
-dev = ["pytest>=8"]
+dev = ["pytest>=8", "jsonschema>=4.18"]
 live-llm = ["openai>=1.0"]
 
 [project.scripts]
