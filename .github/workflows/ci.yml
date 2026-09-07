@@ -26,6 +26,7 @@ jobs:
       - run: make golden
       - run: python -m unittest tests.golden.test_headline_metrics
       - run: git diff --exit-code -- metrics/headline.json
+      - run: python metrics/render.py --check
 
   go-worker:
     runs-on: ubuntu-latest

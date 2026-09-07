@@ -15,6 +15,44 @@ A reconciliation engine for messy client files: deterministic matching where rul
 | **Stack** | Python 3.11, SQLite, a dependency-free CLI and JSON API, JSON Schema event contracts, a Go match worker, Docker, an optional Redpanda streaming profile. |
 | **Validation** | Unit, contract, golden and end-to-end tests; CLI demo smoke; Dockerised Go worker tests; worker image build; real Python-exported events replayed through the Go worker; Compose validation; optional Redpanda round trip. |
 
+<!-- metrics:start -->
+
+## Results
+
+<img src="docs/assets/metrics.svg" alt="Results card" width="920">
+
+Every figure below was observed by `make golden`, which runs offline with a fixed seed and no API key, and writes `metrics/headline.json`. The acme sample pair replayed through every matching tier and scored against the golden summary. Rows marked *pending* need hardware, data or a service the offline harness does not have; nothing here is estimated.
+
+| Metric | Value | How it was measured |
+|---|---|---|
+| Golden checks passed | **6 / 6** | acme replay scored against data/golden/expected_summary.json |
+| Match rate | **75%** | 3 of 4 candidate decisions matched (exact 2, rule 1) |
+| Straight-through | **75%** | 3 of 4 decisions closed by exact/rule/fuzzy tiers without review |
+| Review required | **25%** | 1 of 4 decisions routed to a human review task |
+| Schema conformance | **12 / 12** | emitted transaction.normalized events validated against contracts/schemas (Draft 2020-12, structural) |
+
+**Decision routing (acme replay)**
+
+| | | |
+|---|---|---|
+| Straight-through matches | `███████████████░░░░░` | 3 of 4 decisions |
+| Review required | `█████░░░░░░░░░░░░░░░` | 1 of 4 decisions |
+| Unmatched transactions | `███████░░░░░░░░░░░░░` | 4 of 12 transactions (2 bank, 2 ledger) |
+
+**Replay evidence**
+
+| | Status | Evidence |
+|---|---|---|
+| Samples replayed | observed | acme_bank_statement.csv (6 rows) + acme_ledger_export.csv (6 rows) -> 12 normalized transactions |
+| Samples without a profile | pending | bank_statement.csv, ledger_export.csv: no profile under configs/clients maps their headers, so they were not replayed |
+| Precision / recall / F1 | pending | expected_summary.json carries aggregate thresholds only; no per-pair match labels to score against |
+| Contract fixtures validated | observed | 12 of 12 events under contracts/events pass their declared schema |
+| Fake-LLM adjudications | observed | calls 1, cache hits 0 (DeterministicFakeLLM, offline) |
+| Live LLM adjudication | pending | harness runs offline with no API key; live-model accuracy not measured |
+| Go match-worker candidates | pending | not executed by this harness; covered by go test in go/match-worker |
+
+<!-- metrics:end -->
+
 ## How matching works
 
 ```
