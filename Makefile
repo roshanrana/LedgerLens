@@ -1,6 +1,9 @@
 PYTHON ?= python
 
-.PHONY: golden golden-check card card-check test
+.PHONY: check golden golden-check card card-check test
+
+# The single gate: unit, contract, e2e and golden tests, then the card drift guard.
+check: test golden-check card-check
 
 # Replay the sample statements offline, score them against the golden summary,
 # validate emitted events against contracts/schemas, and write metrics/headline.json.

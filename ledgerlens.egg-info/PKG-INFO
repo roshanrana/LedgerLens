@@ -1,0 +1,13 @@
+Metadata-Version: 2.4
+Name: ledgerlens
+Version: 0.1.0
+Summary: AI-assisted, audit-ready financial reconciliation agent with deterministic-first matching.
+Author: LedgerLens
+Requires-Python: >=3.11
+License-File: LICENSE
+Provides-Extra: dev
+Requires-Dist: pytest>=8; extra == "dev"
+Requires-Dist: jsonschema>=4.18; extra == "dev"
+Provides-Extra: live-llm
+Requires-Dist: openai>=1.0; extra == "live-llm"
+Dynamic: license-file

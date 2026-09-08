@@ -21,9 +21,12 @@ from ledgerlens.domain.models import (
     new_id,
     utc_now,
 )
+from ledgerlens.matching.models import CandidatePair as MatchingPair
+from ledgerlens.matching.models import NormalizedTransaction as MatchingTransaction
 
 
 ALLOWED_REVIEW_DECISIONS = {"match", "no_match", "duplicate", "needs_review", "unmatched"}
+RUN_STATUSES = ("created", "awaiting_review", "completed", "failed")
 
 
 def _json(value: Any) -> str:
@@ -274,6 +277,67 @@ class SQLiteStore:
             ("completed", utc_now(), run_id),
         )
         self._commit()
+
+    def get_run(self, run_id: str) -> dict[str, Any]:
+        row = self.conn.execute("SELECT * FROM reconciliation_runs WHERE id = ?", (run_id,)).fetchone()
+        if row is None:
+            raise ValueError(f"run not found: {run_id}")
+        record = dict(row)
+        record["metadata"] = json.loads(record.pop("metadata_json") or "{}")
+        return record
+
+    def list_runs(self, limit: int = 50) -> list[dict[str, Any]]:
+        rows = self.conn.execute(
+            "SELECT * FROM reconciliation_runs ORDER BY created_at DESC, id DESC LIMIT ?", (int(limit),)
+        ).fetchall()
+        records = []
+        for row in rows:
+            record = dict(row)
+            record["metadata"] = json.loads(record.pop("metadata_json") or "{}")
+            records.append(record)
+        return records
+
+    def set_run_status(self, run_id: str, status: str) -> None:
+        if status not in RUN_STATUSES:
+            raise ValueError(f"unsupported run status: {status}")
+        completed_at = utc_now() if status == "completed" else None
+        cursor = self.conn.execute(
+            "UPDATE reconciliation_runs SET status = ?, completed_at = COALESCE(?, completed_at) WHERE id = ?",
+            (status, completed_at, run_id),
+        )
+        if cursor.rowcount == 0:
+            raise ValueError(f"run not found: {run_id}")
+        self._commit()
+
+    def open_review_task_count(self, run_id: str) -> int:
+        row = self.conn.execute(
+            "SELECT COUNT(*) AS c FROM review_tasks WHERE run_id = ? AND status != 'resolved'", (run_id,)
+        ).fetchone()
+        return int(row["c"])
+
+    def get_candidate_pair(self, pair_id: str) -> MatchingPair:
+        """Rebuild a CandidatePair from its row and the two normalized transactions it joins."""
+        row = self.conn.execute("SELECT * FROM candidate_pairs WHERE id = ?", (pair_id,)).fetchone()
+        if row is None:
+            raise ValueError(f"candidate pair not found: {pair_id}")
+        sides = {}
+        for side, transaction_id in (("left", row["left_transaction_id"]), ("right", row["right_transaction_id"])):
+            txn_row = self.conn.execute(
+                "SELECT * FROM normalized_transactions WHERE id = ?", (transaction_id,)
+            ).fetchone()
+            if txn_row is None:
+                raise ValueError(f"normalized transaction not found: {transaction_id}")
+            sides[side] = _matching_transaction(self._normalized_from_row(txn_row))
+        return MatchingPair(
+            id=row["id"],
+            run_id=row["run_id"],
+            left=sides["left"],
+            right=sides["right"],
+            blocking_reason=row["blocking_reason"],
+            feature_vector=json.loads(row["feature_vector_json"]),
+            candidate_score=float(row["candidate_score"]),
+            created_by=row["created_by"],
+        )
 
     def add_source_file(self, source: SourceFile) -> None:
         self.conn.execute(
@@ -654,3 +718,24 @@ class SQLiteStore:
             quality_flags=json.loads(row["quality_flags_json"]),
             created_at=row["created_at"],
         )
+
+
+def _matching_transaction(transaction: NormalizedTransaction) -> MatchingTransaction:
+    """Project a stored NormalizedTransaction onto the matching-engine transaction type."""
+    return MatchingTransaction(
+        id=transaction.id,
+        account_id=transaction.account_id,
+        source_system=transaction.source_system,
+        posting_date=transaction.posting_date,
+        amount=transaction.amount,
+        currency=transaction.currency,
+        description_raw=transaction.description_raw,
+        description_normalized=transaction.description_normalized,
+        raw_transaction_id=transaction.raw_transaction_id,
+        external_transaction_id=transaction.external_transaction_id,
+        value_date=transaction.value_date,
+        direction=transaction.direction,
+        counterparty=transaction.counterparty or "",
+        reference=transaction.reference or "",
+        quality_flags=tuple(transaction.quality_flags),
+    )
