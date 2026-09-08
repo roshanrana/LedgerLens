@@ -13,20 +13,7 @@ jobs:
         with:
           python-version: "3.11"
       - run: python -m pip install -e ".[dev]"
-      - run: python -m unittest discover -s tests
-
-  golden:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-      - run: python -m pip install -e ".[dev]"
-      - run: make golden
-      - run: python -m unittest tests.golden.test_headline_metrics
-      - run: git diff --exit-code -- metrics/headline.json
-      - run: python metrics/render.py --check
+      - run: make check
 
   go-worker:
     runs-on: ubuntu-latest

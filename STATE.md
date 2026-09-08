@@ -1,24 +1,24 @@
 # STATE — LedgerLens
 
-**Phase:** 5 (implementation) of the 0.2 enhancement, see `docs/05-langgraph-review-gate-design.md`
+**Phase:** 7 — 0.2 shipped; `make check` green locally: 105 tests, golden 6 / 6, review gate 1 / 1, card current, see `docs/05-langgraph-review-gate-design.md`
 **Gate command:** `make check` (`python -m unittest discover -s tests`, `make golden-check`, `make card-check`)
 **Local interpreter:** `.venv/Scripts/python.exe` (Windows) with `pip install -e .[dev]` plus langgraph, langgraph-checkpoint-sqlite, mcp
 **Updated:** 2026-09-08
 
 ## Now / next
 
-- Now: LL-1 (graph + gate + store + CLI/API), LL-2 (masking wiring, live backends), LL-3 (MCP review server) in parallel.
-- Next: golden harness and card (orchestrator), docs (README, OVERVIEW, SHOWCASE, HLD pointer), profile README.
+- Now: pushed; CI runs `make check`.
+- Next (backlog): record one Ollama adjudication run and publish it as a recorded figure; one-to-many matching; HMAC on review resolutions.
 
 ## Task log
 
 | Task | Status | Notes |
 |---|---|---|
 | LL-0 | done | design doc 05, masking module, STATE.md, deps, Makefile check target, CI |
-| LL-1 | in_progress | |
-| LL-2 | in_progress | |
-| LL-3 | in_progress | |
-| LL-4 | todo | golden harness, card, docs, profile |
+| LL-1 | done | graph, gate, CLI/API; 10 tests |
+| LL-2 | done | masking, live backends; 36 tests |
+| LL-3 | done | MCP review server; 16 tests |
+| LL-4 | done | golden harness gate replay, card, README/OVERVIEW/SHOWCASE/runbook/HLD note, profile |
 
 ## Deviations
 

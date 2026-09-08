@@ -1,9 +1,13 @@
 PYTHON ?= python
 
-.PHONY: check golden golden-check card card-check test
+.PHONY: check golden golden-check golden-drift card card-check test
 
 # The single gate: unit, contract, e2e and golden tests, then the card drift guard.
-check: test golden-check card-check
+check: test golden-check golden-drift card-check
+
+# Fail when the regenerated headline differs from the committed one.
+golden-drift:
+	git diff --exit-code -- metrics/headline.json
 
 # Replay the sample statements offline, score them against the golden summary,
 # validate emitted events against contracts/schemas, and write metrics/headline.json.

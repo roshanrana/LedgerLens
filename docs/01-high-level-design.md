@@ -158,6 +158,11 @@ Human decisions should update:
 - LLM cache where applicable.
 - Future rule suggestion queue.
 
+**Status in 0.2.** The review queue is a gate, not a list: the graph pauses at a LangGraph `interrupt()` while
+tasks are open, the run is `awaiting_review`, and a named reviewer completes it from the CLI, the JSON API or the
+MCP server. Human decisions update the match decision table and the audit log; the LLM cache and the rule
+suggestion queue are not updated by review. See `05-langgraph-review-gate-design.md`.
+
 ### 6.5 Cost And Token Controls
 
 Controls:
