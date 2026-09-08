@@ -1,0 +1,7 @@
+{
+  "backend": "openai_compat",
+  "model": "Qwen/Qwen2.5-Coder-7B-Instruct",
+  "base_url": "http://localhost:8000/v1",
+  "api_key_env": "VLLM_API_KEY",
+  "region": null
+}

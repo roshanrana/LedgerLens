@@ -1,6 +1,6 @@
 # LL-3 — MCP review server
 
-**Depends on:** LL-0; integrates with LL-1's `complete_review` when it lands · **Status:** in_progress
+**Depends on:** LL-0; integrates with LL-1's `complete_review` when it lands · **Status:** done
 
 ## Goal
 Any MCP client (Claude Desktop, Cursor, a script) can list runs, read review tasks, inspect a
@@ -35,3 +35,8 @@ tasks.
 ```
 
 ## Handoff notes (≤10 lines)
+- Files: `ledgerlens/mcp/__init__.py` (lazy re-exports, avoids the runpy double-import warning under `-m`), `ledgerlens/mcp/server.py`, `tests/unit/test_mcp_review_server.py` (16 tests), `docs/mcp.md`.
+- `complete_review` always prechecks `open_review_task_count == 0` (and reviewer non-empty, run exists) *before* the lazy `resources.complete_review` lookup, so the refusal holds whether or not LL-1 has landed; tests accept both paths and mock the service once to assert the `(db_path, run_id, reviewer=, note=)` call shape. At validation time `resources.complete_review` did not exist, so the error `"review completion not available"` path is what ran.
+- Data-perimeter test: all `Counterparty`/`Customer`/`Reference`/`Invoice` values from `data/samples/acme_*.csv` (10 strings) asserted absent from the JSON of nine tool results, case-sensitive as they appear in the CSVs.
+- `ledgerlens mcp` CLI subcommand is LL-1's file (`cli.py`); `docs/mcp.md` documents `python -m ledgerlens.mcp.server` as the always-working entry point.
+- Validation tail: `unittest tests.unit.test_mcp_review_server -v` -> `Ran 16 tests in 4.470s / OK`; `unittest discover -s tests` -> `Ran 70 tests in 8.360s / OK`. (asyncio debug-mode lines about the stdio subprocess transport are noise from `IsolatedAsyncioTestCase`, not failures.)

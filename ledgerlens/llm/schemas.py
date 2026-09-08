@@ -6,6 +6,8 @@ from typing import Any
 from ledgerlens.matching import CandidatePair, MatchingPolicy
 from ledgerlens.matching.models import stable_hash
 
+from .masking import mask_transaction
+
 
 PROMPT_SCHEMA_VERSION = "ledgerlens.llm.adjudication.v1"
 MODEL_FAMILY = "fake-deterministic"
@@ -60,7 +62,17 @@ class LLMAdjudicationRequest:
     cache_key: str
 
 
-def build_cache_key(pair: CandidatePair, policy: MatchingPolicy) -> str:
+def build_cache_key(
+    pair: CandidatePair,
+    policy: MatchingPolicy,
+    model_family: str = MODEL_FAMILY,
+) -> str:
+    """Cache key for one pair under one policy and one model family.
+
+    The key covers the computed features, the loose fingerprints and the policy knobs, never
+    the raw transaction payloads. ``model_family`` keeps fake and live decisions apart; the
+    default reproduces the historical fake key byte for byte.
+    """
     left_loose = str(pair.feature_vector["left_fingerprint_loose"])
     right_loose = str(pair.feature_vector["right_fingerprint_loose"])
     ordered = sorted([left_loose, right_loose])
@@ -68,7 +80,7 @@ def build_cache_key(pair: CandidatePair, policy: MatchingPolicy) -> str:
     return stable_hash(
         {
             "prompt_schema_version": PROMPT_SCHEMA_VERSION,
-            "model_family": MODEL_FAMILY,
+            "model_family": model_family,
             "fingerprints": ordered,
             "feature_vector_hash": feature_hash,
             "amount_tolerance": str(policy.amount_tolerance),
@@ -77,15 +89,24 @@ def build_cache_key(pair: CandidatePair, policy: MatchingPolicy) -> str:
     )
 
 
-def build_adjudication_request(pair: CandidatePair, policy: MatchingPolicy) -> LLMAdjudicationRequest:
+def build_adjudication_request(
+    pair: CandidatePair,
+    policy: MatchingPolicy,
+    model_family: str = MODEL_FAMILY,
+) -> LLMAdjudicationRequest:
+    """Build the adjudication payload; ``left``/``right`` are masked, features are verbatim.
+
+    Masking happens here so no caller can hand a model a raw counterparty or reference. The
+    fake adjudicator reads only ``computed_features`` and ``policy``, which are unchanged.
+    """
     computed_features = dict(pair.feature_vector)
     computed_features["candidate_score"] = pair.candidate_score
     return LLMAdjudicationRequest(
         pair_id=pair.id,
         prompt_schema_version=PROMPT_SCHEMA_VERSION,
-        model_family=MODEL_FAMILY,
-        left=pair.left.compact(),
-        right=pair.right.compact(),
+        model_family=model_family,
+        left=mask_transaction(pair.left.compact()),
+        right=mask_transaction(pair.right.compact()),
         computed_features=computed_features,
         policy={
             "amount_tolerance": str(policy.amount_tolerance),
@@ -93,5 +114,5 @@ def build_adjudication_request(pair: CandidatePair, policy: MatchingPolicy) -> L
             "require_human_review_below_confidence": policy.require_human_review_below_confidence,
             "llm_min_threshold": policy.llm_min_threshold,
         },
-        cache_key=build_cache_key(pair, policy),
+        cache_key=build_cache_key(pair, policy, model_family=model_family),
     )

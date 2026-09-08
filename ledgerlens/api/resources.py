@@ -10,9 +10,11 @@ from ledgerlens.reporting.report import generate_markdown_report
 
 
 ROOT = Path(__file__).resolve().parents[2]
+FAKE_LLM = "fake"
+LLM_BACKENDS = ("fake", "ollama", "vllm", "bedrock", "anthropic")
 
 
-def run_demo(db_path: str | Path, client_id: str = "acme") -> dict[str, Any]:
+def run_demo(db_path: str | Path, client_id: str = "acme", llm: str = FAKE_LLM) -> dict[str, Any]:
     return run_reconciliation(
         db_path,
         client_id=client_id,
@@ -20,6 +22,7 @@ def run_demo(db_path: str | Path, client_id: str = "acme") -> dict[str, Any]:
             (ROOT / "data" / "samples" / "acme_bank_statement.csv", ROOT / "configs" / "clients" / "acme_bank.json"),
             (ROOT / "data" / "samples" / "acme_ledger_export.csv", ROOT / "configs" / "clients" / "acme_ledger.json"),
         ],
+        llm=llm,
     )
 
 
@@ -28,19 +31,43 @@ def run_reconciliation(
     *,
     client_id: str,
     sources: list[tuple[str | Path, str | Path]],
+    llm: str = FAKE_LLM,
 ) -> dict[str, Any]:
+    """Run the graph to the review gate (or END) and return the preliminary report."""
     if len(sources) < 2:
         raise ValueError("at least two source/profile pairs are required")
     with _store(db_path) as store:
-        workflow = ReconciliationWorkflow(store)
+        workflow, llm_backend = _build_workflow(store, llm)
         result = workflow.run(client_id=client_id, sources=_normalize_sources(sources))
         return {
             "run_id": result.run_id,
+            "status": result.status,
+            "llm_backend": llm_backend,
             "report": generate_markdown_report(store, result.run_id),
             "counts": store.table_counts(result.run_id),
             "review_tasks": store.list_review_tasks(result.run_id),
             "source_count": len(sources),
         }
+
+
+def get_run(db_path: str | Path, run_id: str) -> dict[str, Any]:
+    """The run record plus the number of review tasks still open (ValueError if unknown)."""
+    with _store(db_path) as store:
+        record = store.get_run(run_id)
+        return {**record, "open_review_tasks": store.open_review_task_count(run_id)}
+
+
+def complete_review(db_path: str | Path, run_id: str, *, reviewer: str, note: str = "") -> dict[str, Any]:
+    """Resume the review gate once every task is resolved; ValueError while the gate is not satisfiable."""
+    with _store(db_path) as store:
+        workflow = ReconciliationWorkflow(store)
+        return workflow.complete_review(run_id, reviewer=reviewer, note=note)
+
+
+def graph_history(db_path: str | Path, run_id: str) -> list[dict[str, Any]]:
+    """LangGraph checkpoints for the run, oldest first."""
+    with _store(db_path) as store:
+        return ReconciliationWorkflow(store).graph_history(run_id)
 
 
 def get_report(db_path: str | Path, run_id: str) -> dict[str, Any]:
@@ -109,6 +136,20 @@ class _store:
 
     def __exit__(self, *_exc: object) -> None:
         self.store.close()
+
+
+def _build_workflow(store: SQLiteStore, llm: str | None) -> tuple[ReconciliationWorkflow, str]:
+    """Build the workflow for ``llm``; falls back to the fake adjudicator when the live backends are absent."""
+    name = (llm or FAKE_LLM).strip().lower()
+    if name == FAKE_LLM:
+        return ReconciliationWorkflow(store), FAKE_LLM
+    if name not in LLM_BACKENDS:
+        raise ValueError(f"unknown LLM backend {name!r}; expected one of {', '.join(LLM_BACKENDS)}")
+    try:
+        from ledgerlens.llm import StoreLLMCache, build_adjudicator
+    except ImportError:
+        return ReconciliationWorkflow(store), FAKE_LLM
+    return ReconciliationWorkflow(store, llm=build_adjudicator(name, StoreLLMCache(store))), name
 
 
 def _single_review_task(store: SQLiteStore, task_id: str) -> dict[str, Any]:

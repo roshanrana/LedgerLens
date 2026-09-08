@@ -1,0 +1,7 @@
+{
+  "backend": "fake",
+  "model": "ledgerlens-fake-llm-v1",
+  "base_url": null,
+  "api_key_env": null,
+  "region": null
+}

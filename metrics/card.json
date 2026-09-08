@@ -1,12 +1,13 @@
 {
   "title": "LedgerLens golden replay",
-  "subtitle": "The acme sample pair replayed through every matching tier and scored against the golden summary.",
+  "subtitle": "The acme sample pair replayed through every matching tier, paused at the review gate, resolved as a human and completed by a second workflow instance.",
   "make_target": "make golden",
   "kpi_order": [
     "golden_checks",
     "match_rate",
     "straight_through_rate",
     "review_required_rate",
-    "schema_conformance"
+    "schema_conformance",
+    "review_gate"
   ]
 }

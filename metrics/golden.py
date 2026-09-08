@@ -14,6 +14,7 @@ Run with:  python -m metrics.golden   (or `make golden`)
 """
 from __future__ import annotations
 
+import asyncio
 import csv
 import json
 import math
@@ -81,6 +82,24 @@ class Replay:
     unmatched_left: int
     unmatched_right: int
     llm_stats: dict[str, int]
+    gate: "GateReplay"
+
+
+@dataclass(frozen=True)
+class GateReplay:
+    """What the review gate did on the golden run, observed rather than asserted."""
+
+    status_at_interrupt: str
+    open_tasks_at_interrupt: int
+    tasks_resolved: int
+    resumed_status: str
+    final_report_has_human_decision: bool
+    final_report_has_finalized_event: bool
+    checkpoints: int
+    mcp_tools_listed: int
+    mcp_tools_called: int
+    mcp_raw_leaks: int
+    masked_fields_per_side: int
 
 
 @dataclass(frozen=True)
@@ -100,18 +119,117 @@ def replay_golden_sources() -> Replay:
             result = workflow.run(GOLDEN_CLIENT_ID, GOLDEN_SOURCES)
             state = result.state
             summary = dict(state.report.summary) if state.report else {}
+            # Snapshot the preliminary run exactly as before: the golden checks score this.
+            counts = store.table_counts(result.run_id)
+            tiers = store.decisions_by_tier(result.run_id)
+            events = normalized_transaction_events(store.list_normalized_transactions(result.run_id))
+            llm_stats = dict(workflow.llm.stats())
+            gate = replay_review_gate(store, Path(tmp) / "golden.db", result.run_id, result.status)
             return Replay(
-                counts=store.table_counts(result.run_id),
-                tiers=store.decisions_by_tier(result.run_id),
+                counts=counts,
+                tiers=tiers,
                 decisions=[{"tier": decision.tier, "decision": decision.decision} for decision in state.decisions],
                 report_summary=summary,
-                normalized_events=normalized_transaction_events(store.list_normalized_transactions(result.run_id)),
+                normalized_events=events,
                 unmatched_left=len(state.unmatched_transaction_ids.get("left", [])),
                 unmatched_right=len(state.unmatched_transaction_ids.get("right", [])),
-                llm_stats=dict(workflow.llm.stats()),
+                llm_stats=llm_stats,
+                gate=gate,
             )
         finally:
             store.close()
+
+
+def replay_review_gate(store: SQLiteStore, db_path: Path, run_id: str, status_at_interrupt: str) -> GateReplay:
+    """Resolve the open tasks as a human, then complete the review from a *second* workflow instance.
+
+    Also drives the MCP review server over an in-memory client against the same database and
+    checks that no raw counterparty or reference from the sample CSVs leaks through any tool.
+    """
+    open_tasks = store.list_review_tasks(run_id, status="open")
+    mcp_listed, mcp_called, leaks, masked_fields = exercise_mcp_review(db_path, run_id, open_tasks)
+    for task in open_tasks:
+        suggested = task["suggested_decision"]
+        decision = suggested if suggested in {"match", "no_match", "duplicate"} else "match"
+        store.resolve_review_task(task["id"], decision, "resolved by the golden harness", "golden-harness")
+    second_store = SQLiteStore(db_path)
+    second_store.initialize()
+    try:
+        second = ReconciliationWorkflow(second_store, MatchingConfig(amount_tolerance=GOLDEN_AMOUNT_TOLERANCE))
+        completion = second.complete_review(run_id, reviewer="golden-harness", note="golden replay")
+        final_report = str(completion.get("report", ""))
+        checkpoints = len(second.graph_history(run_id))
+        resumed_status = str(second_store.get_run(run_id)["status"])
+    finally:
+        second_store.close()
+    return GateReplay(
+        status_at_interrupt=status_at_interrupt,
+        open_tasks_at_interrupt=len(open_tasks),
+        tasks_resolved=len(open_tasks),
+        resumed_status=resumed_status,
+        final_report_has_human_decision="human" in final_report,
+        final_report_has_finalized_event="run.finalized" in final_report,
+        checkpoints=checkpoints,
+        mcp_tools_listed=mcp_listed,
+        mcp_tools_called=mcp_called,
+        mcp_raw_leaks=leaks,
+        masked_fields_per_side=masked_fields,
+    )
+
+
+RAW_SAMPLE_COLUMNS = ("Counterparty", "Customer", "Reference", "Invoice", "Payee", "Memo")
+
+
+def raw_sample_strings() -> set[str]:
+    """Identifier-like values from the sample CSVs that must never leave the engine unmasked."""
+    values: set[str] = set()
+    for csv_path, _profile in GOLDEN_SOURCES:
+        with csv_path.open(encoding="utf-8", newline="") as handle:
+            for row in csv.DictReader(handle):
+                for column in RAW_SAMPLE_COLUMNS:
+                    value = (row.get(column) or "").strip()
+                    if len(value) >= 4:
+                        values.add(value)
+    return values
+
+
+def exercise_mcp_review(db_path: Path, run_id: str, open_tasks: list[dict[str, Any]]) -> tuple[int, int, int, int]:
+    """Drive the MCP review server in-memory; return (tools listed, tools called, raw leaks, masked fields)."""
+    from ledgerlens.mcp.server import build_server
+    from mcp.client import Client
+
+    raw = raw_sample_strings()
+    server = build_server(db_path)
+
+    async def drive() -> tuple[int, int, int, int]:
+        called = 0
+        leaks = 0
+        masked_fields = 0
+        async with Client(server) as client:
+            tools = await client.list_tools()
+            listed = len(tools.tools)
+            calls: list[tuple[str, dict[str, Any]]] = [
+                ("list_runs", {"limit": 5}),
+                ("get_run", {"run_id": run_id}),
+                ("list_review_tasks", {"run_id": run_id}),
+                ("get_report", {"run_id": run_id}),
+            ]
+            if open_tasks:
+                calls.append(("get_review_pair", {"task_id": open_tasks[0]["id"]}))
+            for name, arguments in calls:
+                result = await client.call_tool(name, arguments)
+                payload = result.structured_content or {}
+                called += 1
+                text = json.dumps(payload, sort_keys=True)
+                leaks += sum(1 for value in raw if value in text)
+                if name == "get_review_pair" and "pair" in payload:
+                    left = payload["pair"].get("left", {})
+                    masked_fields = sum(
+                        1 for key in ("reference_token", "counterparty_token", "description") if key in left
+                    )
+        return listed, called, leaks, masked_fields
+
+    return asyncio.run(drive())
 
 
 def golden_checks(replay: Replay, expected: dict[str, Any]) -> list[dict[str, Any]]:
@@ -246,7 +364,27 @@ def build_kpis(
         "note": "emitted transaction.normalized events validated against contracts/schemas (Draft 2020-12, structural)",
         "accent": "teal" if emitted.valid == emitted.total else "red",
     }
+    kpis["review_gate"] = _review_gate_kpi(replay.gate)
     return kpis
+
+
+def _review_gate_kpi(gate: GateReplay) -> dict[str, str]:
+    gated = gate.status_at_interrupt == "awaiting_review"
+    resumed = (
+        gate.resumed_status == "completed"
+        and gate.final_report_has_human_decision
+        and gate.final_report_has_finalized_event
+    )
+    passed = 1 if gated and resumed else 0
+    return {
+        "label": "Review gate",
+        "value": f"{passed} / 1",
+        "note": (
+            f"run paused at await_review with {gate.open_tasks_at_interrupt} open task(s); resumed by a second "
+            "workflow instance after human resolution; final report carries the human decision"
+        ),
+        "accent": "teal" if passed else "red",
+    }
 
 
 def _rate_kpis(replay: Replay, routing: dict[str, int]) -> dict[str, dict[str, str]]:
@@ -346,8 +484,43 @@ def build_facts(replay: Replay, fixtures: ValidationResult, unprofiled: list[Pat
             "status": "ok",
         },
         {
+            "label": "LangGraph checkpoints",
+            "value": (
+                f"{replay.gate.checkpoints} checkpoints for the gated run in the run database "
+                "(SqliteSaver, thread_id = run_id); every step replayable with graph-history"
+            ),
+            "status": "ok" if replay.gate.checkpoints >= 13 else "blocked",
+        },
+        {
+            "label": "Cross-instance resume",
+            "value": (
+                f"status {replay.gate.status_at_interrupt} at the interrupt; {replay.gate.tasks_resolved} task(s) "
+                f"resolved as a human; a second workflow instance completed the review -> {replay.gate.resumed_status}"
+            ),
+            "status": "ok" if replay.gate.resumed_status == "completed" else "blocked",
+        },
+        {
+            "label": "MCP review tools",
+            "value": (
+                f"{replay.gate.mcp_tools_called} of {replay.gate.mcp_tools_listed} tools called over an in-memory MCP "
+                f"session; {replay.gate.mcp_raw_leaks} raw counterparty/reference strings from the samples leaked"
+            ),
+            "status": "ok" if replay.gate.mcp_raw_leaks == 0 and replay.gate.mcp_tools_called else "blocked",
+        },
+        {
+            "label": "Payload masking",
+            "value": (
+                f"{replay.gate.masked_fields_per_side} of 3 sensitive fields per side tokenised or redacted "
+                "(reference, counterparty, description) under ledgerlens.masking.v1, for the model and for MCP"
+            ),
+            "status": "ok" if replay.gate.masked_fields_per_side == 3 else "blocked",
+        },
+        {
             "label": "Live LLM adjudication",
-            "value": "harness runs offline with no API key; live-model accuracy not measured",
+            "value": (
+                "openai_compat (Ollama, vLLM), bedrock and anthropic adapters ship behind the same contract; "
+                "the harness runs the deterministic fake with no key, so live accuracy is not measured"
+            ),
             "status": "pending",
         },
         {

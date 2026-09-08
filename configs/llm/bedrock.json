@@ -1,0 +1,7 @@
+{
+  "backend": "bedrock",
+  "model": "anthropic.claude-opus-5",
+  "base_url": null,
+  "api_key_env": null,
+  "region": "us-east-1"
+}

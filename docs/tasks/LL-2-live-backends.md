@@ -1,6 +1,6 @@
 # LL-2 — Masked adjudication requests and live backends
 
-**Depends on:** LL-0 · **Status:** in_progress
+**Depends on:** LL-0 · **Status:** done
 
 ## Goal
 Every payload that reaches a model is masked, and the adjudicator contract that the fake
@@ -38,3 +38,9 @@ replay changes.
 ```
 
 ## Handoff notes (≤10 lines)
+- `unittest tests.unit.test_masking tests.unit.test_llm_live tests.unit.test_llm_cache -v` → `Ran 38 tests ... OK`.
+- `unittest discover -s tests` → `Ran 94 tests ... FAILED (failures=1)`: the one failure is `test_agents_workflow...routes_ambiguous_llm_result_to_review` (node list gained `await_review`, `finalize_run`) — LL-1's in-flight graph work, outside LL-2 scope; passed at LL-2's baseline (42 tests OK).
+- `metrics.golden` → `golden_checks 6/6, match_rate 75%, straight_through_rate 75%, review_required_rate 25%, schema_conformance 12/12`; `metrics/headline.json` byte-identical to the pre-change file. Fake cache key for the pinned pair unchanged (`960e7a4c…0855`, asserted in `test_masking.py`).
+- Wiring for LL-1: `adjudicator = build_adjudicator(name, cache)` (name = `fake|ollama|vllm|bedrock|anthropic`, `LLMError` on unknown name / unset env var / missing extra); build requests with `build_adjudication_request(pair, policy, model_family=getattr(adjudicator.client, "model_family", MODEL_FAMILY))` so live decisions never share cache rows with the fake. Live clients expose `.model_family` = `"<backend>:<model>"`; the fake has none, so the getattr default keeps its keys byte-identical.
+- `CachedLLMAdjudicator.stats()` keeps `calls` = adjudications; a live client's usage lands as `prompt_tokens`, `completion_tokens`, `backend_calls` (retries included). No `usage` on the fake, so golden stats are untouched.
+- Bedrock/Anthropic send `max_tokens` only (current Claude models reject sampling params); OpenAI-compat sends `temperature: 0` + `response_format: json_object`. `parse_decision` parses the fence-stripped reply first and brace-slices only when that is not valid JSON, so a JSON array is rejected, prose-wrapped objects are recovered.

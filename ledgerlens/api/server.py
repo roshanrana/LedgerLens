@@ -8,8 +8,11 @@ from typing import Any
 from urllib.parse import parse_qs, urlparse
 
 from ledgerlens.api.resources import (
+    complete_review,
     export_normalized_events,
     get_report,
+    get_run,
+    graph_history,
     list_review_tasks,
     resolve_review_task,
     run_demo,
@@ -31,22 +34,35 @@ class LedgerLensAPIHandler(BaseHTTPRequestHandler):
             status = _first(query.get("status"))
             self._json({"review_tasks": list_review_tasks(self.db_path, run_id=run_id, status=status)})
             return
-        if parsed.path.startswith("/runs/") and parsed.path.endswith("/events/normalized"):
-            run_id = parsed.path.split("/")[2]
-            self._text(export_normalized_events(self.db_path, run_id), content_type="application/x-ndjson")
-            return
-        if parsed.path.startswith("/runs/") and parsed.path.endswith("/report"):
-            run_id = parsed.path.split("/")[2]
-            self._json(get_report(self.db_path, run_id))
+        if parsed.path.startswith("/runs/"):
+            self._get_run_resource(parsed.path)
             return
         self._json({"error": "not_found"}, status=HTTPStatus.NOT_FOUND)
+
+    def _get_run_resource(self, path: str) -> None:
+        parts = [part for part in path.split("/") if part]
+        run_id = parts[1] if len(parts) >= 2 else ""
+        tail = "/".join(parts[2:])
+        try:
+            if tail == "events/normalized":
+                self._text(export_normalized_events(self.db_path, run_id), content_type="application/x-ndjson")
+            elif tail == "report":
+                self._json(get_report(self.db_path, run_id))
+            elif tail == "graph/history":
+                self._json({"run_id": run_id, "history": graph_history(self.db_path, run_id)})
+            elif tail == "" and run_id:
+                self._json(get_run(self.db_path, run_id))
+            else:
+                self._json({"error": "not_found"}, status=HTTPStatus.NOT_FOUND)
+        except ValueError as exc:
+            self._json({"error": str(exc)}, status=_error_status(exc))
 
     def do_POST(self) -> None:
         parsed = urlparse(self.path)
         if parsed.path == "/demo":
             try:
                 body = self._read_json()
-                payload = run_demo(self.db_path, client_id=body.get("client_id", "acme"))
+                payload = run_demo(self.db_path, client_id=body.get("client_id", "acme"), llm=body.get("llm", "fake"))
             except ValueError as exc:
                 self._json({"error": str(exc)}, status=HTTPStatus.BAD_REQUEST)
                 return
@@ -60,6 +76,7 @@ class LedgerLensAPIHandler(BaseHTTPRequestHandler):
                     self.db_path,
                     client_id=body.get("client_id", "default"),
                     sources=sources,
+                    llm=body.get("llm", "fake"),
                 )
             except (KeyError, ValueError) as exc:
                 self._json({"error": str(exc)}, status=HTTPStatus.BAD_REQUEST)
@@ -82,7 +99,24 @@ class LedgerLensAPIHandler(BaseHTTPRequestHandler):
                 return
             self._json(payload)
             return
+        if parsed.path.startswith("/runs/") and parsed.path.endswith("/review/complete"):
+            self._post_review_complete(parsed.path.split("/")[2])
+            return
         self._json({"error": "not_found"}, status=HTTPStatus.NOT_FOUND)
+
+    def _post_review_complete(self, run_id: str) -> None:
+        try:
+            body = self._read_json()
+            payload = complete_review(
+                self.db_path,
+                run_id,
+                reviewer=str(body.get("reviewer", "")),
+                note=str(body.get("note", "")),
+            )
+        except ValueError as exc:
+            self._json({"error": str(exc)}, status=_gate_status(exc))
+            return
+        self._json(payload)
 
     def log_message(self, _format: str, *_args: Any) -> None:
         return
@@ -156,6 +190,16 @@ def _sources_from_body(body: dict[str, Any]) -> list[tuple[str, str]]:
 
 
 def _error_status(exc: Exception) -> HTTPStatus:
-    if "already resolved" in str(exc):
+    message = str(exc)
+    if "already resolved" in message:
         return HTTPStatus.CONFLICT
+    if "not found" in message:
+        return HTTPStatus.NOT_FOUND
     return HTTPStatus.BAD_REQUEST
+
+
+def _gate_status(exc: Exception) -> HTTPStatus:
+    """Review gate errors: unknown run is 404, everything else (open tasks, no reviewer, wrong status) is 409."""
+    if "not found" in str(exc):
+        return HTTPStatus.NOT_FOUND
+    return HTTPStatus.CONFLICT

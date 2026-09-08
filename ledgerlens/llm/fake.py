@@ -1,8 +1,12 @@
 from __future__ import annotations
 
 from decimal import Decimal
+from typing import TYPE_CHECKING, Any
 
 from .schemas import LLMAdjudicationRequest, LLMDecision
+
+if TYPE_CHECKING:  # pragma: no cover - import cycle guard; live.py imports this module
+    from .live import LLMClient
 
 
 class DeterministicFakeLLM:
@@ -63,7 +67,7 @@ class DeterministicFakeLLM:
 
 
 class CachedLLMAdjudicator:
-    def __init__(self, client: DeterministicFakeLLM, cache) -> None:
+    def __init__(self, client: "LLMClient", cache: Any) -> None:
         self.client = client
         self.cache = cache
         self.cache_hits = 0
@@ -81,14 +85,35 @@ class CachedLLMAdjudicator:
         return decision.with_cache(cache_key=request.cache_key, cache_hit=False)
 
     def stats(self) -> dict[str, int]:
+        """Cache counters, plus the client's token usage when the client tracks it.
+
+        ``calls`` stays the number of adjudications sent to the client (cache misses). Live
+        clients count every backend round trip, retries included, which lands under
+        ``backend_calls`` so the two never get confused.
+        """
         cache_stats = self.cache.stats()
-        return {
+        base = {
             "calls": self.cache_misses,
             "cache_hits": self.cache_hits,
             "cache_misses": self.cache_misses,
             "calls_avoided": self.cache_hits,
             "cache_entries": cache_stats.get("entries", 0),
         }
+        usage = getattr(self.client, "usage", None)
+        if not isinstance(usage, dict):
+            return base
+        return {**base, **_usage_stats(usage)}
+
+
+def _usage_stats(usage: dict[str, Any]) -> dict[str, int]:
+    merged = {
+        key: int(value)
+        for key, value in usage.items()
+        if key != "calls" and isinstance(value, (int, float)) and not isinstance(value, bool)
+    }
+    if isinstance(usage.get("calls"), (int, float)):
+        merged["backend_calls"] = int(usage["calls"])
+    return merged
 
 
 def _estimate_tokens(request: LLMAdjudicationRequest) -> int:

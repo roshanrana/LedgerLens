@@ -29,6 +29,14 @@ class HeadlineMetricsTests(unittest.TestCase):
         self.assertIn("Review required", labels)
         statuses = {row["label"]: row["status"] for row in self.headline["facts"]["rows"]}
         self.assertEqual(statuses["Precision / recall / F1"], "pending")
+        self.assertEqual(statuses["Live LLM adjudication"], "pending")
+
+    def test_headline_observes_the_review_gate(self):
+        gate = self.headline["kpis"]["review_gate"]
+        self.assertEqual(gate["value"], "1 / 1")
+        statuses = {row["label"]: row["status"] for row in self.headline["facts"]["rows"]}
+        for label in ("LangGraph checkpoints", "Cross-instance resume", "MCP review tools", "Payload masking"):
+            self.assertEqual(statuses[label], "ok", label)
 
     def test_validator_rejects_bad_accent(self):
         bad = copy.deepcopy(self.headline)

@@ -29,6 +29,12 @@
       "value": "12 / 12",
       "note": "emitted transaction.normalized events validated against contracts/schemas (Draft 2020-12, structural)",
       "accent": "teal"
+    },
+    "review_gate": {
+      "label": "Review gate",
+      "value": "1 / 1",
+      "note": "run paused at await_review with 1 open task(s); resumed by a second workflow instance after human resolution; final report carries the human decision",
+      "accent": "teal"
     }
   },
   "bars": {
@@ -86,8 +92,28 @@
         "status": "ok"
       },
       {
+        "label": "LangGraph checkpoints",
+        "value": "15 checkpoints for the gated run in the run database (SqliteSaver, thread_id = run_id); every step replayable with graph-history",
+        "status": "ok"
+      },
+      {
+        "label": "Cross-instance resume",
+        "value": "status awaiting_review at the interrupt; 1 task(s) resolved as a human; a second workflow instance completed the review -> completed",
+        "status": "ok"
+      },
+      {
+        "label": "MCP review tools",
+        "value": "5 of 7 tools called over an in-memory MCP session; 0 raw counterparty/reference strings from the samples leaked",
+        "status": "ok"
+      },
+      {
+        "label": "Payload masking",
+        "value": "3 of 3 sensitive fields per side tokenised or redacted (reference, counterparty, description) under ledgerlens.masking.v1, for the model and for MCP",
+        "status": "ok"
+      },
+      {
         "label": "Live LLM adjudication",
-        "value": "harness runs offline with no API key; live-model accuracy not measured",
+        "value": "openai_compat (Ollama, vLLM), bedrock and anthropic adapters ship behind the same contract; the harness runs the deterministic fake with no key, so live accuracy is not measured",
         "status": "pending"
       },
       {

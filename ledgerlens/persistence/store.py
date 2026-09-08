@@ -40,7 +40,9 @@ class SQLiteStore:
         self.db_path = Path(db_path)
         if self.db_path.parent:
             self.db_path.parent.mkdir(parents=True, exist_ok=True)
-        self.conn = sqlite3.connect(self.db_path)
+        # check_same_thread=False: the LangGraph checkpointer shares this connection and
+        # writes checkpoints from a worker thread (see agents/graph.py StoreCheckpointer).
+        self.conn = sqlite3.connect(self.db_path, check_same_thread=False)
         self.conn.row_factory = sqlite3.Row
         self.conn.execute("PRAGMA foreign_keys = ON")
         self.conn.execute("PRAGMA journal_mode = WAL")

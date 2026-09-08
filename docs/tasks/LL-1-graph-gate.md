@@ -1,6 +1,6 @@
 # LL-1 — LangGraph orchestration, review gate, CLI and API
 
-**Depends on:** LL-0 (design doc 05, store additions, masking) · **Status:** in_progress
+**Depends on:** LL-0 (design doc 05, store additions, masking) · **Status:** done
 
 ## Goal
 Replace the node loop in `ledgerlens/agents/workflow.py` with a compiled LangGraph
@@ -40,3 +40,9 @@ pass, and the golden replay numbers must not move.
 ```
 
 ## Handoff notes (≤10 lines)
+- Validation: `unittest discover -s tests` -> Ran 104 tests, OK; `metrics.golden` -> golden_checks 6 / 6, match_rate 75%, straight_through_rate 75%, review_required_rate 25%, schema_conformance 12 / 12 (unchanged); `cli --db .ledgerlens/ll1.db demo` ends with `Run ID: run_...` / `Status: awaiting_review`.
+- Deviation (store.py, one line): `sqlite3.connect(db_path, check_same_thread=False)`. LangGraph writes checkpoints from a pool thread, and a *second* connection cannot write while the store's run transaction holds the WAL write lock (`database is locked`, verified). So `agents/graph.py::StoreCheckpointer` is a `SqliteSaver` over `store.conn` (same `store.db_path`) that skips its per-write commit while `store.transaction()` is open: checkpoints commit with the rows at the interrupt and roll back with them on failure. Build it outside a transaction (its `setup()` would commit one).
+- Harness recipe: `wf = ReconciliationWorkflow(store); r = wf.run("acme", SOURCES)` -> `r.status == "awaiting_review"`, `r.report` is the preliminary report (golden checks unchanged). Resolve: `store.resolve_review_task(task_id, decision, notes, reviewer)`. Cross-instance completion: `ReconciliationWorkflow(SQLiteStore(db_path)).complete_review(run_id, reviewer="qa", note="...")` -> `{"status": "completed", "finalized": True, "report": <final markdown with human:<decision> and run.finalized>}`; `ValueError` while tasks are open / reviewer empty / status not awaiting_review (API maps to 409, unknown run 404).
+- Checkpoint count: `len(wf.graph_history(run_id))` (15 for the gated acme run: step -1 input, 0 __start__, 1-11 engine nodes, 12 await_review, 13 finalize_run) or `SELECT COUNT(*) FROM checkpoints WHERE thread_id = ?` on the run DB. Memory mode (`run(left, right, run_id=...)`) uses `InMemorySaver`, `gated=False`, never interrupts, returns `WorkflowState` with `finalized=True`.
+- `resources.run_reconciliation/run_demo` payloads gained `status` and `llm_backend`; `--llm` builds via `ledgerlens.llm.build_adjudicator(name, StoreLLMCache(store))` lazily (fake stays the workflow default and never touches LL-2). `cli mcp` imports `ledgerlens.mcp.server.main` lazily.
+- Existing tests changed: only `tests/unit/test_agents_workflow.py` (node_names now 13). `persist_decisions` now writes rows itself (design §2); `generate_report` saves its own audit event; `finalize_run` appends `run.finalized` with deterministic id and sets status via `set_run_status`.

@@ -53,6 +53,8 @@ class AgentsWorkflowTest(unittest.TestCase):
                 "surface_unmatched_transactions",
                 "persist_decisions",
                 "generate_report",
+                "await_review",
+                "finalize_run",
             ],
         )
         self.assertEqual(state.decision_counts["exact"], 1)
