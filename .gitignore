@@ -15,3 +15,6 @@ htmlcov/
 
 .venv/
 *.egg-info/
+
+graphify-out/*
+!graphify-out/GRAPH_REPORT.md

@@ -1,6 +1,6 @@
 PYTHON ?= python
 
-.PHONY: check golden golden-check golden-drift card card-check test
+.PHONY: check golden golden-check golden-drift card card-check test graph
 
 # The single gate: unit, contract, e2e and golden tests, then the card drift guard.
 check: test golden-check golden-drift card-check
@@ -27,3 +27,7 @@ card-check:
 
 test:
 	$(PYTHON) -m unittest discover -s tests
+
+# Rebuild the offline code knowledge graph (graphify; AST-only, no API key, no CI dependency).
+graph:
+	graphify update . && graphify cluster-only . --no-viz --no-label

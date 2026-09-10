@@ -248,6 +248,7 @@ docker build -t ledgerlens-match-worker:test ./go/match-worker
 | [`docs/04-functionality-real-world-ai-brief.md`](docs/04-functionality-real-world-ai-brief.md) | Feature catalogue and the real-world framing |
 | [`docs/05-langgraph-review-gate-design.md`](docs/05-langgraph-review-gate-design.md) | The 0.2 graph, review gate, masking, live backends and MCP server, with numbered decisions |
 | [`docs/mcp.md`](docs/mcp.md) | Registering and using the MCP review server |
+| [`docs/graph/README.md`](docs/graph/README.md) | The offline code knowledge graph (graphify): how to build it and query it |
 
 ## Live model
 

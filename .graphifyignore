@@ -1,0 +1,15 @@
+.venv/
+graphify-out/
+data/
+node_modules/
+dist/
+build/
+.next/
+htmlcov/
+*.min.js
+.ledgerlens/
+ledgerlens.egg-info/
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/

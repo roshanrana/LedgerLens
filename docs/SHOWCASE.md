@@ -227,6 +227,20 @@ over an in-memory `Client(server)`, asserts that none of the ten counterparty an
 `data/samples/acme_*.csv` appears in any result, and spawns `python -m ledgerlens.mcp.server` over stdio once.
 Registration for Claude Desktop, Cursor and Claude Code, and a transcript, are in [mcp.md](mcp.md).
 
+### 16. Query the code graph (`graphify-out/GRAPH_REPORT.md`, `docs/graph/README.md`)
+
+```bash
+graphify update .                                    # rebuild after code changes (AST-only, no API key)
+graphify explain "TieredMatcher"                     # what it is and its 17 direct connections
+graphify path "cli.py" "SQLiteStore"                 # how the CLI reaches persistence
+graphify affected "mask_transaction" --depth 2        # everything that would break if the masking contract changed
+```
+
+An agent working in this repository queries the graph before grepping: 1654 nodes, 3366 edges and 131
+communities built offline by `graphify` (tree-sitter, no LLM) answer "what depends on this?" in a few hundred
+tokens instead of a raw-file search. `docs/graph/README.md` has the full write-up, and the agent-facing skill
+lives at `.claude/skills/graphify/`.
+
 ## Things worth noticing
 
 - **The report reports the model's cost avoided.** That is what an operations lead wants to see before agreeing
